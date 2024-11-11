@@ -149,6 +149,12 @@ void drive (float vLeft, float vRight, float deltaTime){
 }
 
 
+void paus(double pause){
+  double end = micros()+pause*1000000
+  while micros()<end{
+    
+  }
+}  
 
 
 
