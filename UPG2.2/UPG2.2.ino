@@ -31,7 +31,6 @@ void setup() {
 
 void loop() {
   float t = micros()/(1000000.0);
-  if 
   if (t < 15){
     if (t > 1){
       vLeftTarget = 0.15;
@@ -150,9 +149,13 @@ void drive (float vLeft, float vRight, float deltaTime){
 
 
 void paus(double pause){
-  double end = micros()+pause*1000000
-  while micros()<end{
-    
+  double end = pause*1000000;
+  for (int i=0; i<=pause*1000000;){
+    if (micros() > end){
+      break;
+    }
+    else {}
+
   }
 }  
 
