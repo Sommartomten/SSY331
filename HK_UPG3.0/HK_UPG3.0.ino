@@ -24,7 +24,7 @@ float vAllowed;
 float vLeftTarget = 0.0;
 float vRightTarget = 0.0;
 float prevTime = 0.0;
-
+char signal= 'S';
 void setup() {
   Serial.begin(9600);
   motorLeft.attach(servoPinLeft); //Attach motor to pin and outpun initial signal.
@@ -36,30 +36,70 @@ void setup() {
 }
 
 void loop() {
+  float stop = 0;
   float t = micros()/(1000000.0);
   int inputL = digitalRead(pinNrL);
   int inputR = digitalRead(pinNrR);
   Serial.println(String(inputL) + "   " + String(inputR));
-  if (inputL == LOW){
-    //Serial.println("Left ");
-    aMax = 1;
-    vLeftTarget = -0.15;
-    vRightTarget = -0.15;
-  }
-  else if (inputR == LOW){
-    //Serial.println("Right ");
-    aMax = 1;
-    vLeftTarget = -0.15;
-    vRightTarget = -0.15;
-  }
-  else{
-    //Serial.println("clear ");
-    aMax = 0.2;
-    vLeftTarget = 0.15;
-    vRightTarget = 0.15;
-    //Serial.println("time: " + String(t));
-  }
+  if(signal='S')
+  {
+    if (inputR == LOW;inputL == LOW){
+      //Serial.println("Right ");
+      aMax = 1;
+      vLeftTarget = -0.15;
+      vRightTarget = -0.15;
+      stop=1+t;
+      signal=false;}
+    else if (inputL == LOW){
+      //Serial.println("Left ");
+      aMax = 1;
+      vLeftTarget = -0.1;
+      vRightTarget = -0.15;
+      stop=1+t;
+      signal='L';
+    }
+    else if (inputR == LOW){
+      //Serial.println("Right ");
+      aMax = 1;
+      vLeftTarget = -0.15;
+      vRightTarget = -0.1;
+      stop=1+t;
+      signal='R';
 
+    }
+      
+    else if(micros()<(stop*1000000)){
+      aMax = 0.2;
+      vLeftTarget = 0.15;
+      vRightTarget = 0.15;
+    }
+     else if(micros()<((stop+1)*1000000)){
+      if(signal=='R'){
+        aMax = 0.2;
+        vLeftTarget = 0.1;
+        vRightTarget = 0.15;
+      }
+      if(signal=='R'){
+        aMax = 0.2;
+        vLeftTarget = 0.15;
+        vRightTarget = 0.1;
+      }}
+      
+    
+    
+    else{
+      //Serial.println("clear ");
+      aMax = 0.2;
+      vLeftTarget = 0.15;
+      vRightTarget = 0.15;
+      stop=0;
+      //Serial.println("time: " + String(t));
+    }
+  }
+  else if(micros()>(stop*1000000)){
+    signal='S';
+    stop=t+1;
+  }
   float dt = deltaTimeCalc();
   drive(vLeftTarget, vRightTarget, dt);
 }
@@ -138,7 +178,24 @@ void paus(double pause){
       break;
     }
     else {}
+  }}
+
+char check(){
+  int inputL = digitalRead(pinNrL);
+  int inputR = digitalRead(pinNrR);
+  if(inputL == 0; inputR == 0){
+    return 'F';
   }
+  else if (inputL == 0){
+    return('L');
+  }
+  else if(inputR == 0){
+    return('R');
+  }
+  else{
+    return('S');
+  }
+}
 
 
 

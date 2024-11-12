@@ -4,6 +4,8 @@ Servo motorLeft;
 Servo motorRight;
 int servoPinLeft = 11;
 int servoPinRight = 10;
+int pinNrL = 6;
+int pinNrR = 9;
 
 float kLeft1 = -45.7333129;
 float kLeft2 = 69.7616451;
@@ -15,107 +17,119 @@ float kRight3 = 35564.5474;
 float mLeft = 1494.0;   // värdena från linjerna i exceldokumentet.
 float mRight = 1504.6;
 
-float aMax = 0.034;  //aproximation utifrån 5 sekunder och mellan min till max v
+float aMax = 0.2;  //aproximation utifrån 5 sekunder och mellan min till max v
 float vMax = 0.17;
 float vCurrent = 0.0;
 float vAllowed;
 float vLeftTarget = 0.0;
 float vRightTarget = 0.0;
 float prevTime = 0.0;
-
+bool signal= true;
 void setup() {
   Serial.begin(9600);
   motorLeft.attach(servoPinLeft); //Attach motor to pin and outpun initial signal.
   motorRight.attach(servoPinRight); //Attach motor to pin and outpun initial signal.
+
+  pinMode(pinNrL, INPUT);
+  pinMode(pinNrR, INPUT);
+
 }
 
 void loop() {
+  float stop = 0;
   float t = micros()/(1000000.0);
-  if (t < 15){
-    if (t > 1){
+  int inputL = digitalRead(pinNrL);
+  int inputR = digitalRead(pinNrR);
+  Serial.println(String(inputL) + "   " + String(inputR));
+  if(signal)
+  {
+      if (inputL == LOW){
+      //Serial.println("Left ");
+      aMax = 1;
+      vLeftTarget = -0.15;
+      vRightTarget = -0.15;
+      stop=1+t;
+      signal=false;
+    }
+    else if (inputR == LOW){
+      //Serial.println("Right ");
+      aMax = 1;
+      vLeftTarget = -0.15;
+      vRightTarget = -0.15;
+      stop=1+t;
+      signal=false;
+
+    }
+    else if (inputR == LOW;inputL == LOW){
+      //Serial.println("Right ");
+      aMax = 1;
+      vLeftTarget = -0.15;
+      vRightTarget = -0.15;
+      stop=1+t;
+      signal=false;}
+    else{
+      //Serial.println("clear ");
+      aMax = 0.2;
       vLeftTarget = 0.15;
       vRightTarget = 0.15;
-      Serial.println("time: " + String(t));
-    } 
-    if (t > 4){
-      vLeftTarget = 0.01;
-      vRightTarget = 0.05;
-      Serial.println("time: " + String(t));
-    }
-    if (t > 7){
-      vLeftTarget = 0.11;
-      vRightTarget = 0.05;
-      Serial.println("time: " + String(t));
-    }  
-    if (t > 11){
-      vLeftTarget = 0;
-      vRightTarget = 0;
+      //Serial.println("time: " + String(t));
     }
   }
-  
-  else{
-    motorLeft.detach();
-    motorRight.detach();
-    
+  else if(micros()>(stop*1000000)){
+    signal=true;
+    stop=0
   }
-  
   float dt = deltaTimeCalc();
-
-  Serial.println("");
-  Serial.println("*** *** ***");
-  //Serial.println("time:" + String(t));
-  Serial.println("deltaTime: " + String(dt));
-  Serial.println("leftTarget: " + String(vLeftTarget));
-  Serial.println("rightTarget: " + String(vRightTarget));
   drive(vLeftTarget, vRightTarget, dt);
 }
 
 //funktion för vtarget till vallowed
 float vAllowedCalcL(float vTarget, float deltaTime){
-  Serial.println("vAllowedCalc");
+  //Serial.println("vAllowedCalc");
   float val = (vTarget - vCurrent)/deltaTime;
-  Serial.println("val: " + String(val));
+  //Serial.println("val: " + String(val));
   float aAllowed = constrain(val, -aMax, aMax);
   vAllowed = vCurrent + (aAllowed * deltaTime);
-  Serial.println("vAllowed: " + String(vAllowed));
+  //Serial.println("vAllowed: " + String(vAllowed));
   vAllowed = constrain(vAllowed, -vMax, vMax);
   vCurrent = vAllowed;
-  Serial.println("vAllowed: " + String(vAllowed));
+  //Serial.println("vAllowed: " + String(vAllowed));
   return vAllowed;
 }
 
 float vAllowedCalcR(float vTarget, float deltaTime){
-  Serial.println("vAllowedCalc");
+  //Serial.println("vAllowedCalc");
   float val = (vTarget - vCurrent)/deltaTime;
-  Serial.println("valR: " + String(val));
+  //Serial.println("valR: " + String(val));
   float aAllowed = constrain(val, -aMax, aMax);
   vAllowed = vCurrent + (aAllowed * deltaTime);
   vAllowed = constrain(vAllowed, -vMax, vMax);
   vCurrent = vAllowed;
-  Serial.println("vAllowed: " + String(vAllowed));
+  //Serial.println("vAllowed: " + String(vAllowed));
   return vAllowed;
 }
 
 //funktion för hastighet till pulser
 float pulseLeft(float vAllowed){  
   float left = (kLeft1 * vAllowed + kLeft2 * pow(vAllowed,2) +  kLeft3 * pow(vAllowed,3)+ mLeft);
-  Serial.println("left: " + String(left));                                   
+  //Serial.println("left: " + String(left));                                   
   float signalLeft = constrain(left, 1300, 1700); // kommer returnera värdet till den vänstra motorn.
-  Serial.println("leftsignal: " + String(signalLeft));
+  //Serial.println("leftsignal: " + String(signalLeft));
   return signalLeft;
 }
+
 
 float pulseRight(float vAllowed){
   float right = (kRight1 * vAllowed + kRight2 * pow(vAllowed,2) +  kRight3 * pow(vAllowed,3)+ mRight);
   float signalRight = constrain(right, 1300, 1700);
-  Serial.println("Right: " + String(signalRight));
+  //Serial.println("Right: " + String(signalRight));
   return signalRight;
 }
 
 //funktion för att få deltatime
 float deltaTimeCalc(){
   float time = (micros())/(1000000.0);
-  Serial.println("timez: " + String(time));
+  //Serial.println("timez: " + String(time));
   float deltaTime = time - prevTime;
   prevTime = time;
   return deltaTime;
@@ -124,7 +138,7 @@ float deltaTimeCalc(){
 //funktion för driving, tar in värderna för höger och vänster och deltaTime.
 void drive (float vLeft, float vRight, float deltaTime){
 
-  Serial.println("drive");
+  //Serial.println("drive");
   float vLeftAllowed = vAllowedCalcL(vLeft, deltaTime);
   float vRightAllowed = vAllowedCalcR(vRight,deltaTime);
 
@@ -133,7 +147,6 @@ void drive (float vLeft, float vRight, float deltaTime){
   //Serial.println(vLeftNew, vRightNew);
   motorRight.writeMicroseconds(vRightNew);
   motorLeft.writeMicroseconds(vLeftNew);
-
 }
 
 
@@ -144,22 +157,7 @@ void paus(double pause){
       break;
     }
     else {}
-
-  }
-}  
-
-
-
-if (right==0; left == 0)<{
-   vLeftTarget = -0.15;
-   vRightTarget = -0.15;
-   drive(vLeftTarget, vRightTarget, dt)
-   paus(2)
-
-}
-
-
-
+  }}
 
 
 
