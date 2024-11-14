@@ -43,43 +43,46 @@ void loop() {
   Serial.println(String(inputL) + "   " + String(inputR));
   if(signal='S')
   {
-    if (inputR == LOW;inputL == LOW){
-      //Serial.println("Right ");
+    if (inputR == LOW && inputL == LOW){
+      action = "reverse";
       aMax = 1;
       vLeftTarget = -0.15;
       vRightTarget = -0.15;
       stop=1+t;
       signal=false;}
     else if (inputL == LOW){
-      //Serial.println("Left ");
+      action = "reverse - left";
       aMax = 1;
       vLeftTarget = -0.1;
       vRightTarget = -0.15;
-      stop=1+t;
+      stop=2+t;
       signal='L';
     }
     else if (inputR == LOW){
-      //Serial.println("Right ");
+      action = "reverse - right";
       aMax = 1;
       vLeftTarget = -0.15;
       vRightTarget = -0.1;
-      stop=1+t;
+      stop=2+t; //ändrade från 1 till 2
       signal='R';
 
     }
       
     else if(micros()<(stop*1000000)){
+      action = "drive";
       aMax = 0.2;
       vLeftTarget = 0.15;
       vRightTarget = 0.15;
     }
      else if(micros()<((stop+1)*1000000)){
       if(signal=='R'){
+        action = "drive - left";
         aMax = 0.2;
         vLeftTarget = 0.1;
         vRightTarget = 0.15;
       }
       if(signal=='R'){
+        action = "drive - right";
         aMax = 0.2;
         vLeftTarget = 0.15;
         vRightTarget = 0.1;
@@ -88,7 +91,7 @@ void loop() {
     
     
     else{
-      //Serial.println("clear ");
+      action = "drive";
       aMax = 0.2;
       vLeftTarget = 0.15;
       vRightTarget = 0.15;
