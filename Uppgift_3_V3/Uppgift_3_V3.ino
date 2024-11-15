@@ -10,13 +10,13 @@ int pinNrR = 9;
 float kLeft1 = -45.7333129;
 float kLeft2 = 69.7616451;
 float kLeft3 = -34856.56243512;
-
+float stop = 0;
 float kRight1 = 27.4273508;
 float kRight2 = -83.0335264;
 float kRight3 = 35564.5474;
 float mLeft = 1494.0;   // värdena från linjerna i exceldokumentet.
 float mRight = 1504.6;
-
+char action ="";
 float aMax = 0.2;  //aproximation utifrån 5 sekunder och mellan min till max v
 float vMax = 0.17;
 float vCurrent = 0.0;
@@ -36,56 +36,55 @@ void setup() {
 }
 
 void loop() {
-  float stop = 0;
   float t = micros()/(1000000.0);
   int inputL = digitalRead(pinNrL);
   int inputR = digitalRead(pinNrR);
-  Serial.println(String(inputL) + "   " + String(inputR));
-  if(signal='S')
+  Serial.println(String(inputL) + "   " + String(inputR) + "   " + action + "     "+t+"   "+stop);
+  if(signal=='S')
   {
     if (inputR == LOW && inputL == LOW){
       action = "reverse";
       aMax = 1;
       vLeftTarget = -0.15;
       vRightTarget = -0.15;
-      stop=1+t;
+      stop=5+t;
       signal=false;}
     else if (inputL == LOW){
       action = "reverse - left";
       aMax = 1;
-      vLeftTarget = -0.1;
+      vLeftTarget = -0.05;
       vRightTarget = -0.15;
-      stop=2+t;
+      stop=5+t;
       signal='L';
     }
     else if (inputR == LOW){
       action = "reverse - right";
       aMax = 1;
       vLeftTarget = -0.15;
-      vRightTarget = -0.1;
-      stop=2+t; //ändrade från 1 till 2
+      vRightTarget = -0.05;
+      stop=5+t; //ändrade från 1 till 2
       signal='R';
 
     }
       
-    else if(micros()<(stop*1000000)){
+    else if(t>stop){
       action = "drive";
       aMax = 0.2;
       vLeftTarget = 0.15;
       vRightTarget = 0.15;
     }
-     else if(micros()<((stop+1)*1000000)){
+    else if(t<((stop+5))){
       if(signal=='R'){
         action = "drive - left";
         aMax = 0.2;
-        vLeftTarget = 0.1;
+        vLeftTarget = 0.05;
         vRightTarget = 0.15;
       }
-      if(signal=='R'){
+      else if(signal=='R'){
         action = "drive - right";
         aMax = 0.2;
         vLeftTarget = 0.15;
-        vRightTarget = 0.1;
+        vRightTarget = 0.05;
       }}
       
     
@@ -99,9 +98,9 @@ void loop() {
       //Serial.println("time: " + String(t));
     }
   }
-  else if(micros()>(stop*1000000)){
+  else if(t>(stop)){
     signal='S';
-    stop=t+1;
+    stop=t+5;
   }
   float dt = deltaTimeCalc();
   drive(vLeftTarget, vRightTarget, dt);
