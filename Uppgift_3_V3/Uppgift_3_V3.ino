@@ -26,7 +26,7 @@ float vRightTarget = 0.0;
 float prevTime = 0.0;
 bool signal= true;
 int turns = 0;
-char previous= 'R';
+char previous= ' ';
 float stop = 0;
 void setup() {
   Serial.begin(9600);
@@ -42,7 +42,7 @@ void loop() {
   float t = micros()/(1000000.0);
   int inputL = digitalRead(pinNrL);
   int inputR = digitalRead(pinNrR);
-  Serial.println(String(inputL) + "   " + String(inputR) + "   " + action + "     "+ signal +"   ");
+  Serial.println(String(inputL) + "   " + String(inputR) + "   " + action + "     "+ previous +"   ");
   if(signal)
   {
     if (inputR == LOW && inputL == LOW){
@@ -102,6 +102,7 @@ void loop() {
       vRightTarget = 0.15;
       stop=0;
       turns=0;
+      previous = ' ';
       //Serial.println("time: " + String(t));
       // default drive function
     }
