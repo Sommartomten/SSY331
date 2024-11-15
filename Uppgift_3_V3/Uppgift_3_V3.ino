@@ -19,8 +19,10 @@ float mRight = 1504.6;
 char action ="";
 float aMax = 0.2;  //aproximation utifrån 5 sekunder och mellan min till max v
 float vMax = 0.17;
-float vCurrent = 0.0;
-float vAllowed;
+float vCurrentL = 0.0;
+float vCurrentR = 0.0;
+float vAllowedL;
+float vAllowedR;
 float vLeftTarget = 0.0;
 float vRightTarget = 0.0;
 float prevTime = 0.0;
@@ -50,14 +52,14 @@ void loop() {
       aMax = 1;
       vLeftTarget = -0.15;
       vRightTarget = -0.15;
-      stop=5+t;
+      stop=1+t;
       signal=false;}
     else if (inputL == LOW){
       action = "reverse - left";
       aMax = 1;
-      vLeftTarget = -0.05;
-      vRightTarget = -0.15;
-      stop=5+t;
+      vLeftTarget = -0.15;
+      vRightTarget = -0.05;
+      stop=1+t;
       signal=false;
       previous='L';
       turns += 1;
@@ -66,9 +68,9 @@ void loop() {
     else if (inputR == LOW){
       action = "reverse - right";
       aMax = 1;
-      vLeftTarget = -0.15;
-      vRightTarget = -0.05;
-      stop=5+t; //ändrade från 1 till 2
+      vLeftTarget = -0.05;
+      vRightTarget = -0.15;
+      stop=1+t; //ändrade från 1 till 2
       previous='R';
       signal=false;
       turns+=1;
@@ -81,18 +83,18 @@ void loop() {
       vLeftTarget = 0.15;
       vRightTarget = 0.15;
     }
-    else if(t<((stop+5*turns))){ // performes correction turn
+    else if(t<((stop+1*turns))){ // performes correction turn
       if(previous=='L'){
         action = "drive - left";
         aMax = 0.2;
-        vLeftTarget = 0.05;
-        vRightTarget = 0.15;
+        vLeftTarget = 0.15;
+        vRightTarget = 0.05;
       }
       else if(previous=='R'){
         action = "drive - right";
         aMax = 0.2;
-        vLeftTarget = 0.15;
-        vRightTarget = 0.05;
+        vLeftTarget = 0.05;
+        vRightTarget = 0.15;
       }}
       
     
@@ -109,7 +111,7 @@ void loop() {
   }
   else if(t>(stop)){
     signal=true;
-    stop=t+5;
+    stop=t+1;
   }
   float dt = deltaTimeCalc();
   drive(vLeftTarget, vRightTarget, dt);
@@ -118,27 +120,27 @@ void loop() {
 //funktion för vtarget till vallowed
 float vAllowedCalcL(float vTarget, float deltaTime){
   //Serial.println("vAllowedCalc");
-  float val = (vTarget - vCurrent)/deltaTime;
+  float val = (vTarget - vCurrentL)/deltaTime;
   //Serial.println("val: " + String(val));
   float aAllowed = constrain(val, -aMax, aMax);
-  vAllowed = vCurrent + (aAllowed * deltaTime);
+  vAllowedL = vCurrentL + (aAllowed * deltaTime);
   //Serial.println("vAllowed: " + String(vAllowed));
-  vAllowed = constrain(vAllowed, -vMax, vMax);
-  vCurrent = vAllowed;
+  vAllowedL = constrain(vAllowedL, -vMax, vMax);
+  vCurrentL = vAllowedL;
   //Serial.println("vAllowed: " + String(vAllowed));
-  return vAllowed;
+  return vAllowedL;
 }
 
 float vAllowedCalcR(float vTarget, float deltaTime){
   //Serial.println("vAllowedCalc");
-  float val = (vTarget - vCurrent)/deltaTime;
+  float val = (vTarget - vCurrentR)/deltaTime;
   //Serial.println("valR: " + String(val));
   float aAllowed = constrain(val, -aMax, aMax);
-  vAllowed = vCurrent + (aAllowed * deltaTime);
-  vAllowed = constrain(vAllowed, -vMax, vMax);
-  vCurrent = vAllowed;
+  vAllowedR = vCurrentR + (aAllowed * deltaTime);
+  vAllowedR = constrain(vAllowedR, -vMax, vMax);
+  vCurrentR = vAllowedR;
   //Serial.println("vAllowed: " + String(vAllowed));
-  return vAllowed;
+  return vAllowedR;
 }
 
 //funktion för hastighet till pulser
