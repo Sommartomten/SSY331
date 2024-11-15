@@ -81,13 +81,13 @@ void loop() {
       vRightTarget = 0.15;
     }
     else if(t<((stop+5*turns))){
-      if(signal=='R'){
+      if(previous=='R'){
         action = "drive - left";
         aMax = 0.2;
         vLeftTarget = 0.05;
         vRightTarget = 0.15;
       }
-      else if(signal=='R'){
+      else if(previous=='R'){
         action = "drive - right";
         aMax = 0.2;
         vLeftTarget = 0.15;
