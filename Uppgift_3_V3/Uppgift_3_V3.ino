@@ -24,7 +24,9 @@ float vAllowed;
 float vLeftTarget = 0.0;
 float vRightTarget = 0.0;
 float prevTime = 0.0;
-char signal= 'S';
+bool signal= true;
+int turns = 0;
+char previous= 'R';
 void setup() {
   Serial.begin(9600);
   motorLeft.attach(servoPinLeft); //Attach motor to pin and outpun initial signal.
@@ -39,8 +41,8 @@ void loop() {
   float t = micros()/(1000000.0);
   int inputL = digitalRead(pinNrL);
   int inputR = digitalRead(pinNrR);
-  Serial.println(String(inputL) + "   " + String(inputR) + "   " + action + "     "+t+"   "+stop);
-  if(signal=='S')
+  Serial.println(String(inputL) + "   " + String(inputR) + "   " + action + "     "+ signal +"   ");
+  if(signal)
   {
     if (inputR == LOW && inputL == LOW){
       action = "reverse";
@@ -55,7 +57,10 @@ void loop() {
       vLeftTarget = -0.05;
       vRightTarget = -0.15;
       stop=5+t;
-      signal='L';
+      signal=false;
+      previous='L';
+      turns += 1;
+
     }
     else if (inputR == LOW){
       action = "reverse - right";
@@ -63,7 +68,9 @@ void loop() {
       vLeftTarget = -0.15;
       vRightTarget = -0.05;
       stop=5+t; //ändrade från 1 till 2
-      signal='R';
+      previous='R';
+      signal=false;
+      turns+=1;
 
     }
       
@@ -73,7 +80,7 @@ void loop() {
       vLeftTarget = 0.15;
       vRightTarget = 0.15;
     }
-    else if(t<((stop+5))){
+    else if(t<((stop+5*turns))){
       if(signal=='R'){
         action = "drive - left";
         aMax = 0.2;
@@ -95,11 +102,12 @@ void loop() {
       vLeftTarget = 0.15;
       vRightTarget = 0.15;
       stop=0;
+      turns=0;
       //Serial.println("time: " + String(t));
     }
   }
   else if(t>(stop)){
-    signal='S';
+    signal=true;
     stop=t+5;
   }
   float dt = deltaTimeCalc();
