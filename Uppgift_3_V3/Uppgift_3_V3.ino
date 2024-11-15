@@ -10,7 +10,7 @@ int pinNrR = 9;
 float kLeft1 = -45.7333129;
 float kLeft2 = 69.7616451;
 float kLeft3 = -34856.56243512;
-float stop = 0;
+
 float kRight1 = 27.4273508;
 float kRight2 = -83.0335264;
 float kRight3 = 35564.5474;
@@ -27,6 +27,7 @@ float prevTime = 0.0;
 bool signal= true;
 int turns = 0;
 char previous= 'R';
+float stop = 0;
 void setup() {
   Serial.begin(9600);
   motorLeft.attach(servoPinLeft); //Attach motor to pin and outpun initial signal.
@@ -74,14 +75,14 @@ void loop() {
 
     }
       
-    else if(t<stop){
+    else if(t<stop){// drives forward between initial turn and correction turn
       action = "drive";
       aMax = 0.2;
       vLeftTarget = 0.15;
       vRightTarget = 0.15;
     }
-    else if(t<((stop+5*turns))){
-      if(previous=='R'){
+    else if(t<((stop+5*turns))){ // performes correction turn
+      if(previous=='L'){
         action = "drive - left";
         aMax = 0.2;
         vLeftTarget = 0.05;
@@ -97,13 +98,12 @@ void loop() {
     
     
     else{
-      action = "drive";
-      aMax = 0.2;
       vLeftTarget = 0.15;
       vRightTarget = 0.15;
       stop=0;
       turns=0;
       //Serial.println("time: " + String(t));
+      // default drive function
     }
   }
   else if(t>(stop)){
