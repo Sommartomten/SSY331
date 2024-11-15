@@ -74,7 +74,7 @@ void loop() {
 
     }
       
-    else if(t>stop){
+    else if(t<stop){
       action = "drive";
       aMax = 0.2;
       vLeftTarget = 0.15;
