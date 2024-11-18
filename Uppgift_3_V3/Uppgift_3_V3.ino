@@ -27,9 +27,11 @@ float vLeftTarget = 0.0;
 float vRightTarget = 0.0;
 float prevTime = 0.0;
 bool signal= true;
-int turns = 0;
+int turnsR = 0;
+int turnsL =0;
 char previous= ' ';
 float stop = 0;
+int pause=0;
 void setup() {
   Serial.begin(9600);
   motorLeft.attach(servoPinLeft); //Attach motor to pin and outpun initial signal.
@@ -62,7 +64,7 @@ void loop() {
       stop=1+t;
       signal=false;
       previous='L';
-      turns += 1;
+      turnsL += 1;
 
     }
     else if (inputR == LOW){
@@ -73,29 +75,32 @@ void loop() {
       stop=1+t; //ändrade från 1 till 2
       previous='R';
       signal=false;
-      turns+=1;
+      turnsR+=1;
 
     }
       
-    else if(t<stop){// drives forward between initial turn and correction turn
+    else if(t<stop && t>pause){// drives forward between initial turn and correction turn
       action = "drive";
       aMax = 0.2;
       vLeftTarget = 0.15;
       vRightTarget = 0.15;
     }
-    else if(t<((stop+1*turns))){ // performes correction turn
-      if(previous=='L'){
+    else if(turnsL!=0){ // performes correction turn
         action = "drive - left";
         aMax = 0.2;
         vLeftTarget = 0.15;
         vRightTarget = 0.05;
-      }
-      else if(previous=='R'){
+        pause=t+1;
+        turnsL--;}
+
+    else if (turnsR!=0){
         action = "drive - right";
         aMax = 0.2;
         vLeftTarget = 0.05;
         vRightTarget = 0.15;
-      }}
+        pause=t+1;
+        turnsR--;
+      }
       
     
     
@@ -103,7 +108,7 @@ void loop() {
       vLeftTarget = 0.15;
       vRightTarget = 0.15;
       stop=0;
-      turns=0;
+
       previous = ' ';
       //Serial.println("time: " + String(t));
       // default drive function
