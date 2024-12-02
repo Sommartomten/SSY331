@@ -31,6 +31,8 @@ int turns=0;
 char previous= ' ';
 float stop = 0;
 float pause =0;
+float d = 0;
+float dWished= 0.1;//wanted distance in M
 void setup() {
   Serial.begin(9600);
   motorLeft.attach(servoPinLeft); //Attach motor to pin and outpun initial signal.
@@ -42,85 +44,14 @@ void setup() {
 }
 
 void loop() {
-  float t = micros()/(1000000.0);
-  int inputL = digitalRead(pinNrL);
-  int inputR = digitalRead(pinNrR);
-  Serial.println(String(inputL) + "   " + String(turns) + "   " + action );
-  if(signal)
-  {
-    if (inputR == LOW && inputL == LOW){
-      action = "reverse";
-      aMax = 1;
-      vLeftTarget = -0.15;
-      vRightTarget = -0.15;
-      stop=1+t;
-      signal=false;}
-    else if (inputL == LOW){
-      action = "reverse - left";
-      aMax = 1;
-      vLeftTarget = -0.15;
-      vRightTarget = -0.05;
-      stop=1+t;
-      signal=false;
-      previous='L';
-      turns -= 1;
-
-    }
-    else if (inputR == LOW){
-      action = "reverse - right";
-      aMax = 1;
-      vLeftTarget = -0.05;
-      vRightTarget = -0.15;
-      stop=1+t; //ändrade från 1 till 2
-      previous='R';
-      signal=false;
-      turns+=1;
-
-    }
-      
-    else if(t<stop && t>pause){// drives forward between initial turn and correction turn
-      action = "drive";
-      aMax = 0.2;
-      vLeftTarget = 0.15;
-      vRightTarget = 0.15;
-    }
-    else if(turns<0){ // performes correction turn
-        action = "drive - left";
-        aMax = 0.2;
-        vLeftTarget = 0.15;
-        vRightTarget = 0.05;
-        pause=t+1;
-        turns+=1;}
-
-    else if (turns>0){
-        action = "drive - right";
-        aMax = 0.2;
-        vLeftTarget = 0.05;
-        vRightTarget = 0.15;
-        pause=t+1;
-        turns-=1;
-      }
-      
-    
-    
-    else if(t>pause){
-      vLeftTarget = 0.15;
-      vRightTarget = 0.15;
-      stop=0;
-      pause=0;
-      action= "drive_main";
-      previous = ' ';
-      //Serial.println("time: " + String(t));
-      // default drive function
-    }
+float t = micros()/(1000000.0);
+float raw = pingdist(12);
+d=filter(d,raw);
+Serial.println(String(d) +" "+ String(raw));
+float dDiff=dWished-d;
+float dt = deltaTimeCalc();
+drive(regulator(dDiff),regulator(dDiff),dt);
   }
-  else if(t>(stop)){
-    signal=true;
-    stop=t+1;
-  }
-  float dt = deltaTimeCalc();
-  drive(vLeftTarget, vRightTarget, dt);
-}
 
 //funktion för vtarget till vallowed
 float vAllowedCalcL(float vTarget, float deltaTime){
@@ -187,7 +118,9 @@ void drive (float vLeft, float vRight, float deltaTime){
   motorRight.writeMicroseconds(vRightNew);
   motorLeft.writeMicroseconds(vLeftNew);
 }
-
+float regulator(float diff){
+  return diff*(-1); //k uppskattas till 2
+}
 
 unsigned long pingTime(int pingPin){
   pinMode(pingPin, OUTPUT);
@@ -203,10 +136,21 @@ unsigned long pingTime(int pingPin){
 
 
 
-unsigned long pingdist(int pingPin){
+
+
+float pingdist(int pingPin){
   unsigned long  t = pingTime(pingPin)/2;
-  unsigned long  s= 343*t*pow(10,-6);
+  float  s= 343*t*pow(10,-6);
   return s;}
+
+ float filter(float value, float new_value){
+  float x = 0.4;//x uppskattas av oss
+  return (1.0-x)*value + x*new_value; // returnar filtrert avstånd
+  }
+
+
+
+
 
 
 char check(){
