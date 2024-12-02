@@ -16,7 +16,7 @@ float kRight2 = -83.0335264;
 float kRight3 = 35564.5474;
 float mLeft = 1494.0;   // värdena från linjerna i exceldokumentet.
 float mRight = 1504.6;
-char action ="";
+String action ="";
 float aMax = 0.2;  //aproximation utifrån 5 sekunder och mellan min till max v
 float vMax = 0.17;
 float vCurrentL = 0.0;
@@ -27,11 +27,10 @@ float vLeftTarget = 0.0;
 float vRightTarget = 0.0;
 float prevTime = 0.0;
 bool signal= true;
-int turnsR = 0;
-int turnsL =0;
+int turns=0;
 char previous= ' ';
 float stop = 0;
-int pause=0;
+float pause =0;
 void setup() {
   Serial.begin(9600);
   motorLeft.attach(servoPinLeft); //Attach motor to pin and outpun initial signal.
@@ -46,7 +45,7 @@ void loop() {
   float t = micros()/(1000000.0);
   int inputL = digitalRead(pinNrL);
   int inputR = digitalRead(pinNrR);
-  Serial.println(String(inputL) + "   " + String(inputR) + "   " + action + "     "+ previous +"   ");
+  Serial.println(String(inputL) + "   " + String(turns) + "   " + action );
   if(signal)
   {
     if (inputR == LOW && inputL == LOW){
@@ -64,7 +63,7 @@ void loop() {
       stop=1+t;
       signal=false;
       previous='L';
-      turnsL += 1;
+      turns -= 1;
 
     }
     else if (inputR == LOW){
@@ -75,7 +74,7 @@ void loop() {
       stop=1+t; //ändrade från 1 till 2
       previous='R';
       signal=false;
-      turnsR+=1;
+      turns+=1;
 
     }
       
@@ -85,30 +84,31 @@ void loop() {
       vLeftTarget = 0.15;
       vRightTarget = 0.15;
     }
-    else if(turnsL!=0){ // performes correction turn
+    else if(turns<0){ // performes correction turn
         action = "drive - left";
         aMax = 0.2;
         vLeftTarget = 0.15;
         vRightTarget = 0.05;
         pause=t+1;
-        turnsL--;}
+        turns+=1;}
 
-    else if (turnsR!=0){
+    else if (turns>0){
         action = "drive - right";
         aMax = 0.2;
         vLeftTarget = 0.05;
         vRightTarget = 0.15;
         pause=t+1;
-        turnsR--;
+        turns-=1;
       }
       
     
     
-    else{
+    else if(t>pause){
       vLeftTarget = 0.15;
       vRightTarget = 0.15;
       stop=0;
-
+      pause=0;
+      action= "drive_main";
       previous = ' ';
       //Serial.println("time: " + String(t));
       // default drive function
@@ -189,14 +189,6 @@ void drive (float vLeft, float vRight, float deltaTime){
 }
 
 
-void paus(double pause){
-  double end = pause*1000000;
-  for (int i=0; i<=pause*1000000;){
-    if (micros() > end){
-      break;
-    }
-    else {}
-  }}
 
 char check(){
   int inputL = digitalRead(pinNrL);
