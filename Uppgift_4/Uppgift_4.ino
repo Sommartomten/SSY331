@@ -201,6 +201,14 @@ unsigned long pingTime(int pingPin){
   return duration;
   }
 
+
+
+unsigned long pingdist(int pingPin){
+  unsigned long  t = pingtime(pingPin)/2;
+  unsigned long  s= 343*t*pow(10,-6);
+  return s;}
+
+
 char check(){
   int inputL = digitalRead(pinNrL);
   int inputR = digitalRead(pinNrR);
