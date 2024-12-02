@@ -204,7 +204,7 @@ unsigned long pingTime(int pingPin){
 
 
 unsigned long pingdist(int pingPin){
-  unsigned long  t = pingtime(pingPin)/2;
+  unsigned long  t = pingTime(pingPin)/2;
   unsigned long  s= 343*t*pow(10,-6);
   return s;}
 
