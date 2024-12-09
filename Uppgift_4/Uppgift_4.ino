@@ -54,16 +54,15 @@ float t = micros()/(1000000.0);
 float raw = pingdist(12);
 d=filter(d,raw);
 Serial.println(String(d) +" "+ String(raw));
-float dDiff=dWished-d;
+float dDiff=dWished;
 float dt = deltaTimeCalc();
 drive(regulator(dDiff),regulator(dDiff),dt);
-// if (dDiff==0){
-//   for (int thisNote = 0; thisNote < sizeof(melody) / sizeof(int); thisNote++)
-//   {    
-//     tone(6, melody[thisNote], noteDurations[thisNote] * .7);    
-//     delay(noteDurations[thisNote]);    
-//     noTone(6);
-//   }}
+   for (int thisNote = 0; thisNote < sizeof(melody) / sizeof(int); thisNote++)
+   {    
+     tone(6, melody[thisNote], noteDurations[thisNote] * .7);    
+     delay(noteDurations[thisNote]);    
+     noTone(6);
+   }
   }
 
 //funktion för vtarget till vallowed
