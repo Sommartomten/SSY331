@@ -6,8 +6,8 @@ int servoPinLeft = 11;
 int servoPinRight = 10;
 int pinNrL = 6;
 int pinNrR = 9;
-int R = 1463;
-int L = 1520;
+int R = 1445;
+int L = 1540;
 void setup() {
   Serial.begin(9600);
   motorLeft.attach(servoPinLeft); //Attach motor to pin and outpun initial signal.
@@ -23,7 +23,7 @@ void loop() {
  motorRight.writeMicroseconds(R);
   motorLeft.writeMicroseconds(L);
   delay(5000);
-  R=1490;
+  R=1499;
   L=1490;
 
   }
