@@ -8,7 +8,8 @@ int noteDurations[] = {
 };
 
 void setup() {
-  
+  pinMode(3,OUTPUT);
+  digitalWrite(3,HIGH);
   for (int thisNote = 0; thisNote < sizeof(melody) / sizeof(int); thisNote++)
   {    
     tone(6, melody[thisNote], noteDurations[thisNote] * .7);    
