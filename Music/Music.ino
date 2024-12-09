@@ -40,7 +40,7 @@ void loop() {
       noTone(6); 
       notePlaying = false; // Reset the flag to indicate the note has stopped
       thisNote++; // Move to the next note
-      if (thisNote > sizeof(melody)){
+      if (thisNote > sizeof(melody)/ sizeof(melody[0])){
         thisNote=0;
       }
 }}
